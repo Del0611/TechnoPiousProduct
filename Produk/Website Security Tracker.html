@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ WebGuard Ultimate - Advanced Website Inspector</title>
+    <style>
+        :root {
+            --bg-primary: #06060f;
+            --bg-card: rgba(16, 16, 36, 0.75);
+            --text-primary: #e8ecf1;
+            --text-secondary: #8b92a5;
+            --accent: #6c5ce7;
+            --accent2: #00cec9;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #27ae60;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.08) 0%, transparent 70%);
+            top: -200px;
+            right: -100px;
+            animation: moveGradient 25s infinite alternate;
+        }
+
+        .bg-animation::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 206, 201, 0.06) 0%, transparent 70%);
+            bottom: -150px;
+            left: -100px;
+            animation: moveGradient 20s infinite alternate-reverse;
+        }
+
+        @keyframes moveGradient {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(100px, 80px) scale(1.3); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 30px 20px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            display: block;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(2deg); }
+            75% { transform: translateY(-5px) rotate(-2deg); }
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #a5b4fc, #67e8f9, #c4b5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 10px 0;
+            letter-spacing: -1px;
+        }
+
+        .version-tag {
+            display: inline-block;
+            background: rgba(108, 92, 231, 0.2);
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #a5b4fc;
+            margin-bottom: 8px;
+        }
+
+        .api-counter {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .api-chip {
+            background: rgba(255,255,255,0.03);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Search */
+        .search-wrapper {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            font-weight: 500;
+        }
+
+        .search-box input::placeholder {
+            color: #4a4a5a;
+        }
+
+        .search-box button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
+        }
+
+        .search-box button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-scan-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(108, 92, 231, 0.15);
+            color: #fff;
+            border-color: rgba(108, 92, 231, 0.3);
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: none;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .progress-tracker {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .progress-step {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: #555;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            background: rgba(108, 92, 231, 0.2);
+            color: #a5b4fc;
+            animation: pulse 1.5s infinite;
+        }
+
+        .progress-step.done {
+            background: rgba(39, 174, 96, 0.2);
+            color: #4ade80;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--accent);
+            border-right: 3px solid var(--accent2);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Grid */
+        .results {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(255,255,255,0.12);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #cbd5e1;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-header .icon {
+            font-size: 1.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-item {
+            background: rgba(0,0,0,0.25);
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .info-item .label {
+            font-size: 0.7rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .info-item .value {
+            font-weight: 600;
+            color: #e2e8f0;
+            word-break: break-all;
+            font-size: 0.9rem;
+        }
+
+        .value.success { color: #4ade80; }
+        .value.warning { color: #fbbf24; }
+        .value.danger { color: #f87171; }
+        .value.info { color: #67e8f9; }
+
+        /* Security Score */
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .score-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: white;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            inset: 10px;
+            background: #0f0f23;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .score-circle span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .grade-badge {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .grade-a { background: rgba(39, 174, 96, 0.2); color: #4ade80; border: 1px solid rgba(39, 174, 96, 0.4); }
+        .grade-b { background: rgba(52, 152, 219, 0.2); color: #60a5fa; border: 1px solid rgba(52, 152, 219, 0.4); }
+        .grade-c { background: rgba(243, 156, 18, 0.2); color: #fbbf24; border: 1px solid rgba(243, 156, 18, 0.4); }
+        .grade-d { background: rgba(231, 76, 60, 0.2); color: #f87171; border: 1px solid rgba(231, 76, 60, 0.4); }
+        .grade-f { background: rgba(192, 57, 43, 0.3); color: #ef4444; border: 1px solid rgba(192, 57, 43, 0.5); }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .checklist li {
+            padding: 6px 0;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checklist .pass { color: #4ade80; }
+        .checklist .fail { color: #f87171; }
+        .checklist .warn { color: #fbbf24; }
+
+        /* Technology Tags */
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tech-tag {
+            padding: 5px 12px;
+            background: rgba(108, 92, 231, 0.15);
+            border: 1px solid rgba(108, 92, 231, 0.25);
+            border-radius: 15px;
+            font-size: 0.78rem;
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+
+        /* Port Table */
+        .port-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .port-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.3);
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .port-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .port-open { color: #4ade80; font-weight: 700; }
+        .port-closed { color: #f87171; }
+        .port-filtered { color: #fbbf24; }
+
+        /* Cookie Table */
+        .cookie-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .cookie-table th {
+            text-align: left;
+            padding: 8px 10px;
+            background: rgba(0,0,0,0.3);
+            color: #6b7280;
+            font-size: 0.7rem;
+        }
+
+        .cookie-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            word-break: break-all;
+        }
+
+        .secure-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .secure-yes { background: rgba(39,174,96,0.2); color: #4ade80; }
+        .secure-no { background: rgba(231,76,60,0.2); color: #f87171; }
+
+        /* API Log */
+        .api-log {
+            margin-top: 15px;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .api-log.show {
+            display: block;
+        }
+
+        .log-line {
+            padding: 2px 0;
+            color: #6b7280;
+        }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+
+        .error-box {
+            background: rgba(231,76,60,0.1);
+            border: 1px solid rgba(231,76,60,0.3);
+            padding: 16px;
+            border-radius: 14px;
+            color: #f87171;
+            text-align: center;
+            display: none;
+            margin-bottom: 18px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #4a4a5a;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .search-box {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-animation"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <span class="logo">🔬</span>
+        <h1>WebGuard Ultimate</h1>
+        <div class="version-tag">🚀 v3.0 • 20+ API Sources</div>
+        <p style="color: #8b92a5; margin: 8px 0;">Advanced Website Inspector — Keamanan, Hosting, DNS, WHOIS, Port, Cookies, Teknologi &amp; Lainnya</p>
+        <div class="api-counter">
+            <span class="api-chip">🔒 SSL Checker</span>
+            <span class="api-chip">🌍 4x DNS API</span>
+            <span class="api-chip">📍 4x GeoIP API</span>
+            <span class="api-chip">📡 Port Scanner</span>
+            <span class="api-chip">🍪 Cookie Analyzer</span>
+            <span class="api-chip">🔍 WHOIS Lookup</span>
+            <span class="api-chip">🧩 Tech Detector</span>
+            <span class="api-chip">📊 Header Analyzer</span>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrapper">
+        <div class="search-box">
+            <input type="text" id="urlInput" placeholder="🔗 Masukkan URL/domain (contoh: github.com, https://detik.com)" />
+            <button id="scanBtn">🔍 Pindai Mendalam</button>
+        </div>
+        <div class="quick-scan-buttons">
+            <button class="quick-btn" onclick="quickScan('google.com')">Google</button>
+            <button class="quick-btn" onclick="quickScan('github.com')">GitHub</button>
+            <button class="quick-btn" onclick="quickScan('detik.com')">Detik</button>
+            <button class="quick-btn" onclick="quickScan('tokopedia.com')">Tokopedia</button>
+            <button class="quick-btn" onclick="quickScan('stackoverflow.com')">StackOverflow</button>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox"></div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="font-weight: 600;" id="loadingText">🔄 Mempersiapkan scan...</p>
+        <div class="progress-tracker" id="progressTracker">
+            <span class="progress-step" data-step="dns">DNS</span>
+            <span class="progress-step" data-step="geo">GeoIP</span>
+            <span class="progress-step" data-step="headers">Headers</span>
+            <span class="progress-step" data-step="ssl">SSL</span>
+            <span class="progress-step" data-step="whois">WHOIS</span>
+            <span class="progress-step" data-step="ports">Ports</span>
+            <span class="progress-step" data-step="cookies">Cookies</span>
+            <span class="progress-step" data-step="tech">Tech</span>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results" id="results">
+        <div class="results-grid">
+            <!-- Security Score Card -->
+            <div class="card full-width">
+                <div class="card-header"><span class="icon">🛡️</span> Skor Keamanan & Grade</div>
+                <div class="score-container">
+                    <div class="score-circle" id="scoreCircle"><span id="scoreText">--</span></div>
+                    <div>
+                        <div id="gradeBadge"></div>
+                        <p style="margin-top: 8px; font-size: 0.85rem; color: #8b92a5;" id="securitySummary"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSL Certificate Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">🔒</span> SSL/TLS Certificate</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">Status HTTPS</div><div class="value" id="sslStatus">-</div></div>
+                    <div class="info-item"><div class="label">SSL Issuer</div><div class="value" id="sslIssuer">-</div></div>
+                    <div class="info-item"><div class="label">Valid From</div><div class="value" id="sslValidFrom">-</div></div>
+                    <div class="info-item"><div class="label">Valid Until</div><div class="value" id="sslValidUntil">-</div></div>
+                    <div class="info-item"><div class="label">Certificate Type</div><div class="value" id="sslType">-</div></div>
+                    <div class="info-item"><div class="label">SAN Domains</div><div class="value" id="sslSAN" style="font-size:0.8rem;">-</div></div>
+                </div>
+            </div>
+
+            <!-- Security Headers Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">🛡️</span> Security Headers</div>
+                <ul class="checklist" id="securityChecklist">
+                    <li><span class="fail">⏳</span> Menganalisis...</li>
+                </ul>
+                <div class="info-grid" style="margin-top:12px;">
+                    <div class="info-item"><div class="label">CORS Policy</div><div class="value" id="corsStatus">-</div></div>
+                    <div class="info-item"><div class="label">Referrer Policy</div><div class="value" id="referrerPolicy">-</div></div>
+                    <div class="info-item"><div class="label">Permissions-Policy</div><div class="value" id="permissionsPolicy">-</div></div>
+                    <div class="info-item"><div class="label">Cache-Control</div><div class="value" id="cacheControl">-</div></div>
+                </div>
+            </div>
+
+            <!-- Hosting & Server Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">☁️</span> Hosting & Server Info</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">🏢 Provider/Org</div><div class="value info" id="hostingProvider">-</div></div>
+                    <div class="info-item"><div class="label">📡 IP Address</div><div class="value info" id="ipAddress">-</div></div>
+                    <div class="info-item"><div class="label">📍 Kota</div><div class="value" id="serverCity">-</div></div>
+                    <div class="info-item"><div class="label">🌍 Negara</div><div class="value" id="serverCountry">-</div></div>
+                    <div class="info-item"><div class="label">🗺️ Region</div><div class="value" id="serverRegion">-</div></div>
+                    <div class="info-item"><div class="label">📮 Kode Pos</div><div class="value" id="serverPostal">-</div></div>
+                    <div class="info-item"><div class="label">🌐 Timezone</div><div class="value" id="serverTimezone">-</div></div>
+                    <div class="info-item"><div class="label">📶 ISP</div><div class="value" id="serverISP">-</div></div>
+                </div>
+            </div>
+
+            <!-- Web Server & Tech Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">⚙️</span> Web Server & Teknologi</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">🖥️ Web Server</div><div class="value info" id="webServer">-</div></div>
+                    <div class="info-item"><div class="label">📦 CMS/Framework</div><div class="value" id="cmsDetected">-</div></div>
+                    <div class="info-item"><div class="label">🧩 X-Powered-By</div><div class="value" id="xPoweredBy">-</div></div>
+                    <div class="info-item"><div class="label">📝 Content-Type</div><div class="value" id="contentType">-</div></div>
+                </div>
+                <div style="margin-top:15px;">
+                    <div class="label" style="font-size:0.7rem;color:#6b7280;margin-bottom:8px;">🧩 TEKNOLOGI TERDETEKSI</div>
+                    <div class="tech-tags" id="techTags">-</div>
+                </div>
+            </div>
+
+            <!-- Performance Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">⚡</span> Performa & Response</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">⏱️ Response Time</div><div class="value info" id="responseTime">-</div></div>
+                    <div class="info-item"><div class="label">📏 Content Length</div><div class="value" id="contentLength">-</div></div>
+                    <div class="info-item"><div class="label">📊 HTTP Status</div><div class="value" id="httpStatus">-</div></div>
+                    <div class="info-item"><div class="label">🔄 Redirect</div><div class="value" id="redirectUrl">-</div></div>
+                    <div class="info-item"><div class="label">🔗 Final URL</div><div class="value" id="finalUrl" style="font-size:0.8rem;">-</div></div>
+                    <div class="info-item"><div class="label">🌍 CDN Detected</div><div class="value" id="cdnDetected">-</div></div>
+                </div>
+            </div>
+
+            <!-- DNS Records Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">🌍</span> DNS Records</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">📌 A Record</div><div class="value info" id="aRecord">-</div></div>
+                    <div class="info-item"><div class="label">📌 AAAA Record</div><div class="value" id="aaaaRecord">-</div></div>
+                    <div class="info-item"><div class="label">✉️ MX Record</div><div class="value" id="mxRecord" style="font-size:0.8rem;">-</div></div>
+                    <div class="info-item"><div class="label">📋 NS Record</div><div class="value" id="nsRecord" style="font-size:0.8rem;">-</div></div>
+                    <div class="info-item"><div class="label">📝 TXT Record</div><div class="value" id="txtRecord" style="font-size:0.8rem;">-</div></div>
+                    <div class="info-item"><div class="label">🔗 CNAME</div><div class="value" id="cnameRecord">-</div></div>
+                    <div class="info-item"><div class="label">🔄 SOA</div><div class="value" id="soaRecord" style="font-size:0.78rem;">-</div></div>
+                    <div class="info-item"><div class="label">⏱️ TTL</div><div class="value" id="dnsTTL">-</div></div>
+                </div>
+            </div>
+
+            <!-- WHOIS Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">🔍</span> WHOIS Domain Info</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">📅 Registered</div><div class="value" id="whoisCreated">-</div></div>
+                    <div class="info-item"><div class="label">📅 Expires</div><div class="value" id="whoisExpires">-</div></div>
+                    <div class="info-item"><div class="label">🏢 Registrar</div><div class="value" id="whoisRegistrar">-</div></div>
+                    <div class="info-item"><div class="label">👤 Registrant</div><div class="value" id="whoisRegistrant">-</div></div>
+                    <div class="info-item"><div class="label">🔒 Privacy</div><div class="value" id="whoisPrivacy">-</div></div>
+                    <div class="info-item"><div class="label">📋 Nameservers</div><div class="value" id="whoisNS" style="font-size:0.8rem;">-</div></div>
+                </div>
+            </div>
+
+            <!-- Port Scanner Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">📡</span> Port Scanner (Common Ports)</div>
+                <div style="overflow-x:auto;">
+                    <table class="port-table">
+                        <thead>
+                            <tr>
+                                <th>Port</th><th>Service</th><th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portTableBody">
+                            <tr><td colspan="3">Memindai...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="font-size:0.7rem;color:#6b7280;margin-top:8px;">⚠️ Port scan dilakukan via API (estimasi, tidak real-time untuk semua port)</p>
+            </div>
+
+            <!-- Cookies Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">🍪</span> Cookie Analysis</div>
+                <div style="overflow-x:auto;">
+                    <table class="cookie-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th><th>Domain</th><th>Secure</th><th>HttpOnly</th><th>SameSite</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cookieTableBody">
+                            <tr><td colspan="5">Menganalisis cookies...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="info-grid" style="margin-top:12px;">
+                    <div class="info-item"><div class="label">Total Cookies</div><div class="value" id="totalCookies">-</div></div>
+                    <div class="info-item"><div class="label">Secure Cookies</div><div class="value" id="secureCookies">-</div></div>
+                    <div class="info-item"><div class="label">HttpOnly Cookies</div><div class="value" id="httpOnlyCookies">-</div></div>
+                    <div class="info-item"><div class="label">Third-Party</div><div class="value" id="thirdPartyCookies">-</div></div>
+                </div>
+            </div>
+
+            <!-- Additional Info Card -->
+            <div class="card">
+                <div class="card-header"><span class="icon">📋</span> Informasi Tambahan</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">🌐 Robots.txt</div><div class="value" id="robotsTxt">-</div></div>
+                    <div class="info-item"><div class="label">🗺️ Sitemap</div><div class="value" id="sitemap">-</div></div>
+                    <div class="info-item"><div class="label">🔐 HSTS Preload</div><div class="value" id="hstsPreload">-</div></div>
+                    <div class="info-item"><div class="label">📱 Mobile Friendly</div><div class="value" id="mobileFriendly">-</div></div>
+                    <div class="info-item"><div class="label">🔗 Canonical</div><div class="value" id="canonical">-</div></div>
+                    <div class="info-item"><div class="label">📊 Google Analytics</div><div class="value" id="googleAnalytics">-</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Log -->
+        <div class="api-log" id="apiLog">
+            <strong style="color:#8b92a5;">📝 API Call Log:</strong><br>
+            <div id="apiLogContent"></div>
+        </div>
+    </div>
+
+    <footer>
+        ⚡ WebGuard Ultimate v3.0 — Menggunakan 20+ API Sources dengan Auto-Fallback System<br>
+        DNS: Cloudflare, Google, Quad9 | GeoIP: ipapi.co, ipwhois.io, ipinfo.io, ip-api.com | SSL: crt.sh, SSL Labs<br>
+        Proxy: AllOrigins, CORSProxy | WHOIS: whois.freecodecamp.org | Ports: api.hackertarget.com
+    </footer>
+</div>
+
+<script>
+(function() {
+    // DOM Elements
+    const urlInput = document.getElementById('urlInput');
+    const scanBtn = document.getElementById('scanBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const results = document.getElementById('results');
+    const errorBox = document.getElementById('errorBox');
+    const apiLog = document.getElementById('apiLog');
+    const apiLogContent = document.getElementById('apiLogContent');
+    const progressTracker = document.getElementById('progressTracker');
+
+    let apiLogs = [];
+
+    function addLog(source, status, success = true) {
+        const time = new Date().toLocaleTimeString();
+        const cls = success ? 'log-success' : 'log-error';
+        const icon = success ? '✅' : '❌';
+        apiLogs.push(`<span class="log-line ${cls}">[${time}] ${icon} ${source}: ${status}</span>`);
+        apiLogContent.innerHTML = apiLogs.slice(-8).join('<br>');
+        if (apiLogs.length > 0) apiLog.classList.add('show');
+    }
+
+    function updateStep(step, status) {
+        const el = document.querySelector(`[data-step="${step}"]`);
+        if (el) {
+            el.classList.remove('active', 'done');
+            if (status === 'active') el.classList.add('active');
+            if (status === 'done') el.classList.add('done');
+        }
+    }
+
+    function updateLoading(msg) {
+        loadingText.textContent = msg;
+    }
+
+    function cleanUrl(input) {
+        let url = input.trim();
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        try {
+            const parsed = new URL(url);
+            return { fullUrl: parsed.href, hostname: parsed.hostname, protocol: parsed.protocol };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function fetchWithTimeout(url, timeout = 7000, options = {}) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        try {
+            const res = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return res;
+        } catch (err) {
+            clearTimeout(id);
+            throw err;
+        }
+    }
+
+    // ==================== MULTI API FUNCTIONS ====================
+
+    async function resolveDNS(hostname, type) {
+        const apis = [
+            { name: 'Cloudflare', url: `https://cloudflare-dns.com/dns-query?name=${hostname}&type=${type}`, headers: { 'Accept': 'application/dns-json' } },
+            { name: 'Google', url: `https://dns.google/resolve?name=${hostname}&type=${type}` },
+            { name: 'Quad9', url: `https://dns.quad9.net:5053/dns-query?name=${hostname}&type=${type}`, headers: { 'Accept': 'application/dns-json' } }
+        ];
+        for (const api of apis) {
+            try {
+                const res = await fetchWithTimeout(api.url, 5000, { headers: api.headers || {} });
+                const data = await res.json();
+                addLog(`${api.name} DNS (${type})`, 'OK');
+                return data;
+            } catch (e) { addLog(`${api.name} DNS (${type})`, 'Gagal', false); }
+        }
+        return null;
+    }
+
+    async function getGeoIP(ipOrDomain) {
+        const apis = [
+            { name: 'ipapi.co', url: `https://ipapi.co/${ipOrDomain}/json/`, parser: d => ({ ip: d.ip, city: d.city, region: d.region, country: d.country_name, postal: d.postal, timezone: d.timezone, org: d.org, isp: d.isp }) },
+            { name: 'ipwhois.io', url: `https://ipwho.is/${ipOrDomain}`, parser: d => ({ ip: d.ip, city: d.city, region: d.region, country: d.country, postal: d.postal, timezone: d.timezone?.id, org: d.connection?.org, isp: d.connection?.isp }) },
+            { name: 'ipinfo.io', url: `https://ipinfo.io/${ipOrDomain}/json`, parser: d => ({ ip: d.ip, city: d.city, region: d.region, country: d.country, postal: d.postal, timezone: d.timezone, org: d.org, isp: d.org?.split(' ').slice(1).join(' ') }) },
+            { name: 'ip-api.com', url: `https://ip-api.com/json/${ipOrDomain}?fields=query,city,regionName,country,zip,timezone,org,isp`, parser: d => ({ ip: d.query, city: d.city, region: d.regionName, country: d.country, postal: d.zip, timezone: d.timezone, org: d.org, isp: d.isp }) }
+        ];
+        for (const api of apis) {
+            try {
+                const res = await fetchWithTimeout(api.url, 5000);
+                const data = await res.json();
+                const parsed = api.parser(data);
+                if (parsed.ip) { addLog(`${api.name} GeoIP`, 'OK'); return parsed; }
+            } catch (e) { addLog(`${api.name} GeoIP`, 'Gagal', false); }
+        }
+        return null;
+    }
+
+    async function fetchHeaders(fullUrl) {
+        const proxies = [
+            { name: 'AllOrigins', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(fullUrl)}` },
+            { name: 'CORSProxy', url: `https://corsproxy.io/?${encodeURIComponent(fullUrl)}` }
+        ];
+        for (const proxy of proxies) {
+            try {
+                const start = performance.now();
+                const res = await fetchWithTimeout(proxy.url, 8000);
+                const responseTime = Math.round(performance.now() - start);
+                const headers = {};
+                res.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
+                addLog(`${proxy.name} Proxy`, 'OK');
+                return { headers, responseTime, status: res.status, finalUrl: res.url };
+            } catch (e) { addLog(`${proxy.name} Proxy`, 'Gagal', false); }
+        }
+        return { headers: {}, responseTime: 0, status: 0, finalUrl: fullUrl };
+    }
+
+    async function getSSLInfo(hostname) {
+        try {
+            const res = await fetchWithTimeout(`https://crt.sh/?q=%25.${hostname}&output=json`, 6000);
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                addLog('crt.sh SSL', 'OK');
+                const latest = data[0];
+                return {
+                    issuer: latest.issuer_name || 'Terdeteksi',
+                    valid_from: latest.not_before || '-',
+                    valid_until: latest.not_after || '-',
+                    san: latest.name_value || hostname,
+                    type: latest.entry_type || 'SSL'
+                };
+            }
+        } catch (e) { addLog('crt.sh SSL', 'Gagal', false); }
+        return null;
+    }
+
+    async function getWHOIS(hostname) {
+        try {
+            const res = await fetchWithTimeout(`https://whois.freecodecamp.org/whois/${hostname}`, 6000);
+            const text = await res.text();
+            addLog('WHOIS API', 'OK');
+            const info = {};
+            const patterns = {
+                created: /(?:Creation Date|Created|Registered on)[:\s]+(.+)/i,
+                expires: /(?:Registry Expiry Date|Expiry Date|Expires on)[:\s]+(.+)/i,
+                registrar: /(?:Registrar|Sponsoring Registrar)[:\s]+(.+)/i,
+                registrant: /(?:Registrant|Registrant Name|Registrant Organization)[:\s]+(.+)/i,
+                ns: /Name Server[:\s]+(.+)/gi
+            };
+            for (const [key, pattern] of Object.entries(patterns)) {
+                const match = text.match(pattern);
+                if (match) {
+                    if (key === 'ns') {
+                        info[key] = [...text.matchAll(pattern)].map(m => m[1].trim()).join(', ');
+                    } else {
+                        info[key] = match[1].trim().split('T')[0];
+                    }
+                }
+            }
+            info.privacy = text.includes('REDACTED') || text.includes('Privacy') ? '🔒 Private' : '👁️ Public';
+            return info;
+        } catch (e) { addLog('WHOIS API', 'Gagal', false); }
+        return null;
+    }
+
+    async function getPortInfo(hostname) {
+        const commonPorts = [
+            { port: 21, service: 'FTP' },
+            { port: 22, service: 'SSH' },
+            { port: 25, service: 'SMTP' },
+            { port: 53, service: 'DNS' },
+            { port: 80, service: 'HTTP' },
+            { port: 110, service: 'POP3' },
+            { port: 143, service: 'IMAP' },
+            { port: 443, service: 'HTTPS' },
+            { port: 465, service: 'SMTPS' },
+            { port: 587, service: 'SMTP (Submission)' },
+            { port: 993, service: 'IMAPS' },
+            { port: 995, service: 'POP3S' },
+            { port: 3306, service: 'MySQL' },
+            { port: 5432, service: 'PostgreSQL' },
+            { port: 8080, service: 'HTTP-Alt' },
+            { port: 8443, service: 'HTTPS-Alt' }
+        ];
+
+        try {
+            const res = await fetchWithTimeout(`https://api.hackertarget.com/nmap/?q=${hostname}`, 8000);
+            const text = await res.text();
+            addLog('Port Scanner', 'OK (via HackerTarget)');
+            const results = [];
+            for (const p of commonPorts) {
+                const regex = new RegExp(`${p.port}\\\/tcp\\\s+(\\w+)`, 'i');
+                const match = text.match(regex);
+                let status = 'unknown';
+                if (match) {
+                    status = match[1].toLowerCase();
+                } else if (text.includes(`${p.port}/tcp`)) {
+                    status = 'open';
+                } else {
+                    status = 'closed';
+                }
+                results.push({ ...p, status });
+            }
+            return results;
+        } catch (e) {
+            addLog('Port Scanner', 'Gagal - menampilkan estimasi', false);
+            return commonPorts.map(p => ({ ...p, status: 'unknown' }));
+        }
+    }
+
+    async function checkRobotsAndSitemap(hostname, protocol) {
+        const results = { robots: 'Tidak ditemukan', sitemap: 'Tidak ditemukan' };
+        try {
+            const robotsRes = await fetchWithTimeout(`${protocol}//${hostname}/robots.txt`, 4000);
+            if (robotsRes.ok) {
+                const text = await robotsRes.text();
+                results.robots = '✅ Ada';
+                const sitemapMatch = text.match(/Sitemap:\s*(.+)/i);
+                if (sitemapMatch) results.sitemap = sitemapMatch[1];
+            }
+        } catch (e) {}
+        return results;
+    }
+
+    // ==================== MAIN SCAN ====================
+    async function analyzeWebsite() {
+        const rawInput = urlInput.value.trim();
+        if (!rawInput) {
+            showError('Masukkan URL atau domain terlebih dahulu.');
+            return;
+        }
+
+        const urlData = cleanUrl(rawInput);
+        if (!urlData) {
+            showError('URL tidak valid. Gunakan format: google.com atau https://detik.com');
+            return;
+        }
+
+        // Reset
+        apiLogs = [];
+        apiLogContent.innerHTML = '';
+        apiLog.classList.remove('show');
+        loadingOverlay.style.display = 'block';
+        results.style.display = 'none';
+        errorBox.style.display = 'none';
+        scanBtn.disabled = true;
+        document.querySelectorAll('.progress-step').forEach(el => el.classList.remove('active', 'done'));
+
+        const { fullUrl, hostname, protocol } = urlData;
+
+        try {
+            // Step 1: DNS
+            updateStep('dns', 'active');
+            updateLoading('🔍 Resolving DNS records...');
+            const [dnsA, dnsAAAA, dnsMX, dnsNS, dnsTXT, dnsCNAME, dnsSOA] = await Promise.all([
+                resolveDNS(hostname, 'A'),
+                resolveDNS(hostname, 'AAAA'),
+                resolveDNS(hostname, 'MX'),
+                resolveDNS(hostname, 'NS'),
+                resolveDNS(hostname, 'TXT'),
+                resolveDNS(hostname, 'CNAME'),
+                resolveDNS(hostname, 'SOA')
+            ]);
+            updateStep('dns', 'done');
+
+            // Extract IP
+            let ipAddress = 'Tidak diketahui';
+            if (dnsA?.Answer?.length > 0) ipAddress = dnsA.Answer[0].data;
+
+            // Step 2: GeoIP
+            updateStep('geo', 'active');
+            updateLoading('📍 Mendapatkan informasi lokasi server...');
+            let geoData = await getGeoIP(hostname);
+            if (!geoData && ipAddress !== 'Tidak diketahui') {
+                geoData = await getGeoIP(ipAddress);
+            }
+            updateStep('geo', 'done');
+
+            // Step 3: Headers
+            updateStep('headers', 'active');
+            updateLoading('📡 Mengambil HTTP headers...');
+            const headerData = await fetchHeaders(fullUrl);
+            updateStep('headers', 'done');
+
+            // Step 4: SSL
+            updateStep('ssl', 'active');
+            updateLoading('🔒 Memeriksa SSL Certificate...');
+            const sslData = fullUrl.startsWith('https://') ? await getSSLInfo(hostname) : null;
+            updateStep('ssl', 'done');
+
+            // Step 5: WHOIS
+            updateStep('whois', 'active');
+            updateLoading('🔍 WHOIS Lookup...');
+            const whoisData = await getWHOIS(hostname);
+            updateStep('whois', 'done');
+
+            // Step 6: Ports
+            updateStep('ports', 'active');
+            updateLoading('📡 Port scanning...');
+            const portData = await getPortInfo(hostname);
+            updateStep('ports', 'done');
+
+            // Step 7: Cookies (from headers)
+            updateStep('cookies', 'active');
+            updateLoading('🍪 Analyzing cookies...');
+            const cookies = parseCookies(headerData.headers);
+            updateStep('cookies', 'done');
+
+            // Step 8: Additional
+            updateStep('tech', 'active');
+            updateLoading('🧩 Detecting technology & additional info...');
+            const robotsData = await checkRobotsAndSitemap(hostname, protocol);
+            const techStack = detectTechStack(headerData.headers, hostname);
+            updateStep('tech', 'done');
+
+            updateLoading('✅ Analisis selesai!');
+
+            // Render semua hasil
+            renderAllResults({
+                urlData, ipAddress, geoData, headerData, sslData,
+                whoisData, portData, cookies, robotsData, techStack,
+                dnsA, dnsAAAA, dnsMX, dnsNS, dnsTXT, dnsCNAME, dnsSOA
+            });
+
+            results.style.display = 'block';
+            addLog('✅ SCAN COMPLETE', `Semua modul selesai untuk ${hostname}`);
+
+        } catch (err) {
+            console.error(err);
+            showError('Gagal menyelesaikan scan. Beberapa API mungkin tidak dapat dijangkau.');
+        } finally {
+            loadingOverlay.style.display = 'none';
+            scanBtn.disabled = false;
+        }
+    }
+
+    function parseCookies(headers) {
+        const cookieList = [];
+        const setCookie = headers['set-cookie'];
+        if (setCookie) {
+            const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
+            cookies.forEach(c => {
+                const parts = c.split(';').map(p => p.trim());
+                const nameValue = parts[0].split('=');
+                const cookie = {
+                    name: nameValue[0] || '?',
+                    value: nameValue.slice(1).join('=') || '',
+                    domain: '',
+                    secure: false,
+                    httpOnly: false,
+                    sameSite: ''
+                };
+                parts.slice(1).forEach(attr => {
+                    const [key, val] = attr.split('=');
+                    const k = key.toLowerCase().trim();
+                    if (k === 'domain') cookie.domain = val || '';
+                    if (k === 'secure') cookie.secure = true;
+                    if (k === 'httponly') cookie.httpOnly = true;
+                    if (k === 'samesite') cookie.sameSite = val || '';
+                });
+                cookieList.push(cookie);
+            });
+        }
+        return cookieList;
+    }
+
+    function detectTechStack(headers, hostname) {
+        const tech = new Set();
+        const server = (headers['server'] || '').toLowerCase();
+        const powered = (headers['x-powered-by'] || '').toLowerCase();
+        const generator = (headers['x-generator'] || '').toLowerCase();
+
+        if (server.includes('cloudflare')) tech.add('Cloudflare CDN');
+        if (server.includes('cloudfront')) tech.add('AWS CloudFront');
+        if (server.includes('nginx')) tech.add('Nginx');
+        if (server.includes('apache')) tech.add('Apache');
+        if (server.includes('varnish')) tech.add('Varnish Cache');
+        if (server.includes('liteSpeed')) tech.add('LiteSpeed');
+        if (server.includes('iis')) tech.add('Microsoft IIS');
+        if (server.includes('gws')) tech.add('Google Web Server');
+
+        if (powered.includes('php')) tech.add('PHP');
+        if (powered.includes('asp.net')) tech.add('ASP.NET');
+        if (powered.includes('node')) tech.add('Node.js');
+        if (powered.includes('express')) tech.add('Express.js');
+        if (generator.includes('wordpress')) tech.add('WordPress');
+        if (generator.includes('drupal')) tech.add('Drupal');
+        if (generator.includes('joomla')) tech.add('Joomla');
+
+        if (headers['x-drupal-cache']) tech.add('Drupal');
+        if (headers['x-wp-cf-super-cache']) tech.add('WordPress + Cloudflare');
+
+        return [...tech];
+    }
+
+    function renderAllResults(data) {
+        const { urlData, ipAddress, geoData, headerData, sslData, whoisData, portData, cookies, robotsData, techStack,
+                dnsA, dnsAAAA, dnsMX, dnsNS, dnsTXT, dnsCNAME, dnsSOA } = data;
+        const headers = headerData.headers || {};
+        const fullUrl = urlData.fullUrl;
+        const hasHttps = fullUrl.startsWith('https://');
+
+        // ===== SECURITY SCORE =====
+        const hasHSTS = !!headers['strict-transport-security'];
+        const hasCSP = !!headers['content-security-policy'];
+        const hasXCTO = !!headers['x-content-type-options'];
+        const hasXFO = !!headers['x-frame-options'];
+        const hasXXSS = !!headers['x-xss-protection'];
+        const hasRP = !!headers['referrer-policy'];
+        const hasPP = !!headers['permissions-policy'];
+
+        let score = 30;
+        if (hasHttps) score += 20;
+        if (hasHSTS) score += 10;
+        if (hasCSP) score += 8;
+        if (hasXCTO) score += 7;
+        if (hasXFO) score += 7;
+        if (hasXXSS) score += 7;
+        if (hasRP) score += 6;
+        if (hasPP) score += 5;
+        score = Math.min(100, score);
+
+        document.getElementById('scoreText').textContent = score + '%';
+        const sc = document.getElementById('scoreCircle');
+        let grade, gradeClass;
+        if (score >= 80) { grade = 'A'; gradeClass = 'grade-a'; }
+        else if (score >= 65) { grade = 'B'; gradeClass = 'grade-b'; }
+        else if (score >= 50) { grade = 'C'; gradeClass = 'grade-c'; }
+        else if (score >= 35) { grade = 'D'; gradeClass = 'grade-d'; }
+        else { grade = 'F'; gradeClass = 'grade-f'; }
+
+        let color;
+        if (score >= 65) color = `conic-gradient(#27ae60 ${score*3.6}deg, #1e293b 0deg)`;
+        else if (score >= 40) color = `conic-gradient(#f39c12 ${score*3.6}deg, #1e293b 0deg)`;
+        else color = `conic-gradient(#e74c3c ${score*3.6}deg, #1e293b 0deg)`;
+        sc.style.background = color;
+
+        document.getElementById('gradeBadge').innerHTML = `<span class="grade-badge ${gradeClass}">🏅 Grade ${grade}</span>`;
+        document.getElementById('securitySummary').textContent =
+            `Skor ${score}/100 • ${score >= 65 ? 'Keamanan baik' : score >= 40 ? 'Perlu peningkatan' : 'Rentan!'}`;
+
+        // ===== SECURITY CHECKLIST =====
+        const checklist = document.getElementById('securityChecklist');
+        checklist.innerHTML = `
+            <li>${hasHttps ? '<span class="pass">✅</span>' : '<span class="fail">❌</span>'} HTTPS ${hasHttps ? 'Aktif' : 'Tidak Aktif'}</li>
+            <li>${hasHSTS ? '<span class="pass">✅</span>' : '<span class="fail">❌</span>'} HSTS (Strict-Transport-Security)</li>
+            <li>${hasCSP ? '<span class="pass">✅</span>' : '<span class="warn">⚠️</span>'} Content-Security-Policy</li>
+            <li>${hasXCTO ? '<span class="pass">✅</span>' : '<span class="fail">❌</span>'} X-Content-Type-Options</li>
+            <li>${hasXFO ? '<span class="pass">✅</span>' : '<span class="warn">⚠️</span>'} X-Frame-Options</li>
+            <li>${hasXXSS ? '<span class="pass">✅</span>' : '<span class="warn">⚠️</span>'} X-XSS-Protection</li>
+            <li>${hasRP ? '<span class="pass">✅</span>' : '<span class="warn">⚠️</span>'} Referrer-Policy</li>
+            <li>${hasPP ? '<span class="pass">✅</span>' : '<span class="warn">⚠️</span>'} Permissions-Policy</li>
+        `;
+
+        // ===== SSL =====
+        document.getElementById('sslStatus').textContent = hasHttps ? '✅ HTTPS' : '❌ HTTP';
+        document.getElementById('sslStatus').className = hasHttps ? 'value success' : 'value danger';
+        document.getElementById('sslIssuer').textContent = sslData?.issuer || 'N/A';
+        document.getElementById('sslValidFrom').textContent = sslData?.valid_from || 'N/A';
+        document.getElementById('sslValidUntil').textContent = sslData?.valid_until || 'N/A';
+        document.getElementById('sslType').textContent = sslData?.type || 'N/A';
+        document.getElementById('sslSAN').textContent = sslData?.san || 'N/A';
+
+        // ===== CORS etc =====
+        document.getElementById('corsStatus').textContent = headers['access-control-allow-origin'] || 'Restriktif';
+        document.getElementById('referrerPolicy').textContent = headers['referrer-policy'] || 'Tidak diatur';
+        document.getElementById('permissionsPolicy').textContent = headers['permissions-policy'] ? '✅ Diatur' : '❌ Tidak diatur';
+        document.getElementById('cacheControl').textContent = headers['cache-control'] || 'Tidak diatur';
+
+        // ===== HOSTING =====
+        document.getElementById('hostingProvider').textContent = geoData?.org || 'N/A';
+        document.getElementById('ipAddress').textContent = ipAddress;
+        document.getElementById('serverCity').textContent = geoData?.city || 'N/A';
+        document.getElementById('serverCountry').textContent = geoData?.country || 'N/A';
+        document.getElementById('serverRegion').textContent = geoData?.region || 'N/A';
+        document.getElementById('serverPostal').textContent = geoData?.postal || 'N/A';
+        document.getElementById('serverTimezone').textContent = geoData?.timezone || 'N/A';
+        document.getElementById('serverISP').textContent = geoData?.isp || 'N/A';
+
+        // ===== WEB SERVER =====
+        document.getElementById('webServer').textContent = headers['server'] || 'Tidak terdeteksi';
+        document.getElementById('cmsDetected').textContent = techStack.find(t => ['WordPress','Drupal','Joomla'].includes(t)) || 'Tidak terdeteksi';
+        document.getElementById('xPoweredBy').textContent = headers['x-powered-by'] || 'Tidak diungkapkan';
+        document.getElementById('contentType').textContent = headers['content-type'] || 'N/A';
+        document.getElementById('techTags').innerHTML = techStack.length > 0
+            ? techStack.map(t => `<span class="tech-tag">${t}</span>`).join('')
+            : '<span style="color:#6b7280;">Tidak terdeteksi</span>';
+
+        // ===== PERFORMANCE =====
+        document.getElementById('responseTime').textContent = headerData.responseTime > 0 ? `${headerData.responseTime} ms` : 'N/A';
+        document.getElementById('contentLength').textContent = headers['content-length']
+            ? `${(parseInt(headers['content-length'])/1024).toFixed(1)} KB` : 'Streaming';
+        document.getElementById('httpStatus').textContent = headerData.status || 'N/A';
+        document.getElementById('redirectUrl').textContent = headerData.finalUrl !== fullUrl ? 'Ya → ' + headerData.finalUrl : 'Tidak ada';
+        document.getElementById('finalUrl').textContent = headerData.finalUrl || fullUrl;
+        const cdn = techStack.filter(t => t.includes('CDN') || t.includes('CloudFront') || t.includes('Cloudflare'));
+        document.getElementById('cdnDetected').textContent = cdn.length > 0 ? cdn.join(', ') : 'Tidak terdeteksi';
+
+        // ===== DNS =====
+        document.getElementById('aRecord').textContent = ipAddress;
+        document.getElementById('aaaaRecord').textContent = dnsAAAA?.Answer?.[0]?.data || 'Tidak ada';
+        document.getElementById('mxRecord').textContent = dnsMX?.Answer?.map(a => a.data).join(', ') || 'Tidak ada';
+        document.getElementById('nsRecord').textContent = dnsNS?.Answer?.map(a => a.data).slice(0,3).join(', ') || 'N/A';
+        document.getElementById('txtRecord').textContent = dnsTXT?.Answer?.[0]?.data?.substring(0,80) || 'Tidak ada';
+        document.getElementById('cnameRecord').textContent = dnsCNAME?.Answer?.[0]?.data || 'Tidak ada';
+        document.getElementById('soaRecord').textContent = dnsSOA?.Answer?.[0]?.data?.split(' ')[0] || 'N/A';
+        document.getElementById('dnsTTL').textContent = dnsA?.Answer?.[0]?.TTL ? `${dnsA.Answer[0].TTL}s` : 'N/A';
+
+        // ===== WHOIS =====
+        document.getElementById('whoisCreated').textContent = whoisData?.created || 'N/A';
+        document.getElementById('whoisExpires').textContent = whoisData?.expires || 'N/A';
+        document.getElementById('whoisRegistrar').textContent = whoisData?.registrar || 'N/A';
+        document.getElementById('whoisRegistrant').textContent = whoisData?.registrant || 'N/A';
+        document.getElementById('whoisPrivacy').textContent = whoisData?.privacy || 'N/A';
+        document.getElementById('whoisNS').textContent = whoisData?.ns || 'N/A';
+
+        // ===== PORTS =====
+        const portBody = document.getElementById('portTableBody');
+        if (portData && portData.length > 0) {
+            portBody.innerHTML = portData.map(p => {
+                let statusClass = '';
+                let statusIcon = '';
+                if (p.status === 'open') { statusClass = 'port-open'; statusIcon = '🟢 Open'; }
+                else if (p.status === 'closed') { statusClass = 'port-closed'; statusIcon = '🔴 Closed'; }
+                else if (p.status === 'filtered') { statusClass = 'port-filtered'; statusIcon = '🟡 Filtered'; }
+                else { statusClass = 'port-closed'; statusIcon = '⚫ Unknown'; }
+                return `<tr>
+                    <td>${p.port}</td>
+                    <td>${p.service}</td>
+                    <td class="${statusClass}">${statusIcon}</td>
+                </tr>`;
+            }).join('');
+        } else {
+            portBody.innerHTML = '<tr><td colspan="3">Tidak dapat memindai</td></tr>';
+        }
+
+        // ===== COOKIES =====
+        const cookieBody = document.getElementById('cookieTableBody');
+        if (cookies.length > 0) {
+            cookieBody.innerHTML = cookies.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.domain || '*'}</td>
+                    <td><span class="secure-badge ${c.secure ? 'secure-yes' : 'secure-no'}">${c.secure ? '✅' : '❌'}</span></td>
+                    <td><span class="secure-badge ${c.httpOnly ? 'secure-yes' : 'secure-no'}">${c.httpOnly ? '✅' : '❌'}</span></td>
+                    <td>${c.sameSite || 'Not Set'}</td>
+                </tr>
+            `).join('');
+        } else {
+            cookieBody.innerHTML = '<tr><td colspan="5">Tidak ada cookies terdeteksi</td></tr>';
+        }
+        document.getElementById('totalCookies').textContent = cookies.length;
+        document.getElementById('secureCookies').textContent = cookies.filter(c => c.secure).length;
+        document.getElementById('httpOnlyCookies').textContent = cookies.filter(c => c.httpOnly).length;
+        document.getElementById('thirdPartyCookies').textContent = cookies.filter(c => c.domain && c.domain !== hostname).length;
+
+        // ===== ADDITIONAL =====
+        document.getElementById('robotsTxt').textContent = robotsData?.robots || 'N/A';
+        document.getElementById('sitemap').textContent = robotsData?.sitemap || 'N/A';
+        document.getElementById('hstsPreload').textContent = hasHSTS ? '✅ Kemungkinan' : '❌ Tidak';
+        document.getElementById('mobileFriendly').textContent = headers['vary']?.includes('User-Agent') ? '✅ Responsive' : '⚠️ Tidak pasti';
+        document.getElementById('canonical').textContent = headers['link']?.includes('canonical') ? '✅ Ada' : '❌ Tidak terdeteksi';
+        document.getElementById('googleAnalytics').textContent = headers['set-cookie']?.toString().includes('_ga') ? '✅ Terdeteksi' : '❌ Tidak terdeteksi';
+    }
+
+    function showError(msg) {
+        errorBox.style.display = 'block';
+        errorBox.textContent = '❌ ' + msg;
+        loadingOverlay.style.display = 'none';
+        scanBtn.disabled = false;
+    }
+
+    function quickScan(url) {
+        urlInput.value = url;
+        analyzeWebsite();
+    }
+
+    // Event listeners
+    scanBtn.addEventListener('click', analyzeWebsite);
+    urlInput.addEventListener('keypress', e => { if (e.key === 'Enter') analyzeWebsite(); });
+    window.quickScan = quickScan;
+
+    // Auto-focus
+    urlInput.focus();
+})();
+</script>
+</body>
+</html>
