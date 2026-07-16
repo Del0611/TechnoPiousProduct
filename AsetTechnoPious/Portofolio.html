@@ -672,6 +672,16 @@
                 align-items: center;
             }
         }
+
+        #pdfViewer {
+            max-height: 70vh; /* Membatasi tinggi viewer */
+            overflow: auto;   /* Munculkan scroll jika zoom terlalu besar */
+        }
+
+        #pdfCanvas {
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -728,6 +738,9 @@
                     <button id="prevBtn" style="cursor:pointer;">Prev</button>
                     <span id="pageInfo">Page: 0 / 0</span>
                     <button id="nextBtn" style="cursor:pointer;">Next</button>
+                    <!-- Tombol Zoom -->
+                    <button id="zoomOutBtn" style="margin-left:15px;">-</button>
+                    <button id="zoomInBtn">+</button>
                 </div>
             </div>
         </div>
@@ -945,22 +958,43 @@
             quote: "Bersama kita lebih kuat."
         }];
 
-            let pdfDoc = null, pageNum = 1;
+
 
         // Inisialisasi PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        let pdfDoc = null, 
+            pageNum = 1, 
+            scale = 1.0; // Nilai default zoom
 
         function renderPage(num) {
             pdfDoc.getPage(num).then(page => {
                 const canvas = document.getElementById('pdfCanvas');
                 const ctx = canvas.getContext('2d');
-                const viewport = page.getViewport({ scale: 1.5 });
+                
+                // Menggunakan variabel scale untuk mengatur ukuran
+                const viewport = page.getViewport({ scale: scale });
+                
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
+                
                 page.render({ canvasContext: ctx, viewport: viewport });
                 document.getElementById('pageInfo').textContent = `Page: ${num} / ${pdfDoc.numPages}`;
             });
         }
+
+        // Logika Zoom In/Out
+        document.getElementById('zoomInBtn').onclick = () => {
+            scale += 0.25; // Memperbesar 25%
+            renderPage(pageNum);
+        };
+
+        document.getElementById('zoomOutBtn').onclick = () => {
+            if (scale > 0.5) { // Batasi agar tidak terlalu kecil
+                scale -= 0.25; 
+                renderPage(pageNum);
+            }
+        };
 
         function loadPDF(url) {
             const viewer = document.getElementById('pdfViewer');
