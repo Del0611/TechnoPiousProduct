@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -718,6 +721,15 @@
             </div>
             <div class="modal-social" id="modalSocial"></div>
             <div class="modal-quote" id="modalQuote">“ Karya terbaik adalah yang menginspirasi. ”</div>
+                <!-- Area PDF Viewer -->
+            <div id="pdfViewer" style="margin-top:20px; display:none; text-align:center;">
+                <canvas id="pdfCanvas" style="width: 100%; border: 1px solid #4f3d70;"></canvas>
+                <div style="margin-top:10px; color:#b7a9d4;">
+                    <button id="prevBtn" style="cursor:pointer;">Prev</button>
+                    <span id="pageInfo">Page: 0 / 0</span>
+                    <button id="nextBtn" style="cursor:pointer;">Next</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -824,7 +836,8 @@
             bio: "Menciptakan harmoni visual & interaksi yang humanis.",
             detail: { join: "2022", loc: "Bandung", exp: "6+ thn", cert: "Design Lead" },
             social: ["fa-brands fa-dribbble", "fa-brands fa-behance"],
-            quote: "Desain yang baik terasa seperti tidak ada desain."
+            quote: "Desain yang baik terasa seperti tidak ada desain.",
+            pdfUrl: "files/farhan.pdf"
         }, {
             name: "Bima Sakti",
             role: "Fullstack Dev",
@@ -932,6 +945,37 @@
             quote: "Bersama kita lebih kuat."
         }];
 
+            let pdfDoc = null, pageNum = 1;
+
+        // Inisialisasi PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        function renderPage(num) {
+            pdfDoc.getPage(num).then(page => {
+                const canvas = document.getElementById('pdfCanvas');
+                const ctx = canvas.getContext('2d');
+                const viewport = page.getViewport({ scale: 1.5 });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                page.render({ canvasContext: ctx, viewport: viewport });
+                document.getElementById('pageInfo').textContent = `Page: ${num} / ${pdfDoc.numPages}`;
+            });
+        }
+
+        function loadPDF(url) {
+            const viewer = document.getElementById('pdfViewer');
+            viewer.style.display = 'block';
+            pdfjsLib.getDocument(url).promise.then(pdf => {
+                pdfDoc = pdf;
+                renderPage(1);
+            });
+        }
+
+        // Event untuk tombol navigasi
+        document.getElementById('prevBtn').onclick = () => { if(pageNum > 1) renderPage(--pageNum); };
+        document.getElementById('nextBtn').onclick = () => { if(pageNum < pdfDoc.numPages) renderPage(++pageNum); };
+
+
         // ============================================
         // STATE
         // ============================================
@@ -1031,6 +1075,7 @@
             const p = peopleData[index];
             if (!p) return;
 
+            // 1. Update Data Profil (Avatar, Nama, Role, Bio)
             modalAvatar.textContent = p.name.charAt(0).toUpperCase();
             const colors = ['#3b2d5a', '#2f2552', '#4a3a6b', '#332a54', '#453560'];
             modalAvatar.style.background = `linear-gradient(145deg, ${colors[index % colors.length]}, #1f1830)`;
@@ -1039,6 +1084,7 @@
             modalRole.textContent = p.role;
             modalBio.textContent = p.bio;
 
+            // 2. Update Detail
             const d = p.detail || {};
             modalDetails.innerHTML = `
                 <span><i class="fas fa-calendar-alt"></i> Bergabung: ${d.join || '2024'}</span>
@@ -1047,6 +1093,7 @@
                 <span><i class="fas fa-award"></i> Sertifikasi: ${d.cert || '—'}</span>
             `;
 
+            // 3. Update Social Icons
             modalSocial.innerHTML = '';
             p.social.forEach(iconClass => {
                 const icon = document.createElement('i');
@@ -1054,8 +1101,21 @@
                 modalSocial.appendChild(icon);
             });
 
+            // 4. Update Quote
             modalQuote.textContent = p.quote ? `“ ${p.quote} ”` : '“ Karya terbaik adalah yang menginspirasi. ”';
 
+            // 5. Integrasi PDF.js
+            const pdfViewer = document.getElementById('pdfViewer');
+            if (p.pdfUrl) {
+                // Jika data memiliki link PDF, tampilkan viewer dan muat file
+                pdfViewer.style.display = 'block';
+                loadPDF(p.pdfUrl); // Memanggil fungsi loadPDF yang sudah dibuat
+            } else {
+                // Jika tidak ada link PDF, sembunyikan viewer
+                pdfViewer.style.display = 'none';
+            }
+
+            // 6. Tampilkan Modal
             modalOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
