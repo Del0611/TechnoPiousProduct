@@ -672,6 +672,13 @@
                 align-items: center;
             }
         }
+
+        #pdfCanvas:fullscreen {
+            background-color: white; /* PDF akan terlihat seperti kertas putih saat full screen */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -721,13 +728,15 @@
             </div>
             <div class="modal-social" id="modalSocial"></div>
             <div class="modal-quote" id="modalQuote">“ Karya terbaik adalah yang menginspirasi. ”</div>
-                <!-- Area PDF Viewer -->
+            <!-- Area PDF Viewer -->
             <div id="pdfViewer" style="margin-top:20px; display:none; text-align:center;">
-                <canvas id="pdfCanvas" style="width: 100%; border: 1px solid #4f3d70;"></canvas>
+                <!-- Tambahkan cursor pointer agar user tahu ini bisa diklik -->
+                <canvas id="pdfCanvas" style="width: 100%; border: 1px solid #4f3d70; cursor: pointer;" title="Klik untuk Fullscreen"></canvas>
+                
                 <div style="margin-top:10px; color:#b7a9d4;">
-                    <button id="prevBtn" style="cursor:pointer;">Prev</button>
+                    <button id="prevBtn">Prev</button>
                     <span id="pageInfo">Page: 0 / 0</span>
-                    <button id="nextBtn" style="cursor:pointer;">Next</button>
+                    <button id="nextBtn">Next</button>
                 </div>
             </div>
         </div>
@@ -961,6 +970,30 @@
                 document.getElementById('pageInfo').textContent = `Page: ${num} / ${pdfDoc.numPages}`;
             });
         }
+
+            // Ambil elemen canvas
+            const canvas = document.getElementById('pdfCanvas');
+
+            // Tambahkan event listener untuk klik fullscreen
+            canvas.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    // Jika belum fullscreen, aktifkan fullscreen
+                    if (canvas.requestFullscreen) {
+                        canvas.requestFullscreen();
+                    } else if (canvas.webkitRequestFullscreen) { /* Safari */
+                        canvas.webkitRequestFullscreen();
+                    } else if (canvas.msRequestFullscreen) { /* IE11 */
+                        canvas.msRequestFullscreen();
+                    }
+                    canvas.style.backgroundColor = "#fff"; // Opsional: latar belakang putih saat fullscreen
+                } else {
+                    // Jika sudah fullscreen, keluar dari fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                    canvas.style.backgroundColor = "transparent";
+                }
+            });
 
         function loadPDF(url) {
             const viewer = document.getElementById('pdfViewer');
